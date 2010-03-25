@@ -17,11 +17,11 @@
  *-------------------------------------------------------------------------
  */
 
- /*
-    Aleksej Dereka <aleksej.dereka@gmail.com>
-    2010/03/23
-    ported to D language 
- */
+/*
+   Aleksej Dereka <aleksej.dereka@gmail.com>
+   2010/03/23
+   ported to D language
+*/
 
 module libpq;
 
@@ -146,7 +146,7 @@ extern(C)
         int         be_pid;                                 /* process ID of notifying server process */
         char       *extra;                                  /* notification parameter */
         /* Fields below here are private to libpq; apps should not use 'em */
-        PGnotify *next;                              /* list link */
+        PGnotify *next;                                     /* list link */
     };
 
     /* Function types for notice-handling callbacks */
@@ -292,7 +292,7 @@ extern(C)
     version(SSL)
     {
         /* Get the OpenSSL structure associated with a connection. Returns NULL for
-          * unencrypted connections or if any other TLS library is in use. */
+         * unencrypted connections or if any other TLS library is in use. */
         void *PQgetssl(PGconn *conn);
 
         /* Tell libpq whether it needs to initialize OpenSSL */
@@ -321,11 +321,11 @@ extern(C)
      *	   Only required for multithreaded apps that use kerberos
      *	   both within their app and for postgresql connections.
      */
-/*
-    typedef void (*pgthreadlock_t) (int acquire);
+    /*
+        typedef void (*pgthreadlock_t) (int acquire);
 
-    pgthreadlock_t PQregisterThreadLock(pgthreadlock_t newhandler);
-*/
+        pgthreadlock_t PQregisterThreadLock(pgthreadlock_t newhandler);
+    */
     /* === in fe-exec.c === */
 
     /* Simple synchronous query */
@@ -428,8 +428,8 @@ extern(C)
     int  PQfsize(PGresult *res, int field_num);
     int  PQfmod(PGresult *res, int field_num);
     char *PQcmdStatus(PGresult *res);
-    char *PQoidStatus(PGresult *res);                 /* old and ugly */
-    Oid  PQoidValue(PGresult *res);                   /* new and improved */
+    char *PQoidStatus(PGresult *res);                       /* old and ugly */
+    Oid  PQoidValue(PGresult *res);                         /* new and improved */
     char *PQcmdTuples(PGresult *res);
     char *PQgetvalue(PGresult *res, int tup_num, int field_num);
     int  PQgetlength(PGresult *res, int tup_num, int field_num);
@@ -469,29 +469,29 @@ extern(C)
     /* These forms are deprecated! */
     size_t PQescapeString(char *to, char *from, size_t length);
     ubyte *PQescapeBytea(ubyte *from, size_t from_length,
-                        size_t *to_length);
+        size_t *to_length);
 
     /* === in fe-print.c === */
 
-    void PQprint(FILE *fout,                                 /* output stream */
-                PGresult *res,
-                PQprintOpt *ps);                              /* option structure */
+    void PQprint(FILE *fout,                                /* output stream */
+        PGresult *res,
+        PQprintOpt *ps);                                    /* option structure */
 
     /*
      * really old printing routines
      */
     void PQdisplayTuples(PGresult *res,
-                        FILE *fp,                           /* where to send the output */
-                        int fillAlign,                                   /* pad the fields with spaces */
-                        char *fieldSep,                                     /* field separator */
-                        int printHeader,                                    /* display headers? */
-                        int quiet);
+        FILE *fp,                                           /* where to send the output */
+        int fillAlign,                                      /* pad the fields with spaces */
+        char *fieldSep,                                     /* field separator */
+        int printHeader,                                    /* display headers? */
+        int quiet);
 
     void PQprintTuples(PGresult *res,
-                       FILE *fout,                                         /* output stream */
-                       int printAttName,                                   /* print attribute names */
-                       int terseOutput,                                    /* delimiter bars */
-                       int width);                                         /* width of column, if 0, use variable width */
+        FILE *fout,                                         /* output stream */
+        int printAttName,                                   /* print attribute names */
+        int terseOutput,                                    /* delimiter bars */
+        int width);                                         /* width of column, if 0, use variable width */
 
     /* === in fe-lobj.c === */
 
