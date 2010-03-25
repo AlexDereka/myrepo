@@ -32,7 +32,7 @@ else
 
 alias char uchar;
 alias uint Oid;
-const uint  InvalidOid = 0;
+const uint InvalidOid = 0;
 
 const char PG_DIAG_SEVERITY           = 'S';
 const char PG_DIAG_SQLSTATE           = 'C';
@@ -46,6 +46,53 @@ const char PG_DIAG_CONTEXT            = 'W';
 const char PG_DIAG_SOURCE_FILE        = 'F';
 const char PG_DIAG_SOURCE_LINE        = 'L';
 const char PG_DIAG_SOURCE_FUNCTION    = 'R';
+
+/* ----------------
+ *		initial contents of pg_type
+ * ----------------
+ */
+const int BOOLOID        = 16;
+const int BYTEAOID       = 17;
+const int CHAROID        = 18;
+const int NAMEOID        = 19;
+const int INT8OID        = 20;
+const int INT2OID        = 21;
+const int INT2VECTOROID  = 22;
+const int INT4OID        = 23;
+const int REGPROCOID     = 24;
+const int TEXTOID        = 25;
+const int OIDOID         = 26;
+const int TIDOID         = 27;
+const int XIDOID         = 28;
+const int CIDOID         = 29;
+const int OIDVECTOROID   = 30;
+const int POINTOID       = 600;
+const int LSEGOID        = 601;
+const int PATHOID        = 602;
+const int BOXOID         = 603;
+const int POLYGONOID     = 604;
+const int LINEOID        = 628;
+const int FLOAT4OID      = 700;
+const int FLOAT8OID      = 701;
+const int ABSTIMEOID     = 702;
+const int RELTIMEOID     = 703;
+const int TINTERVALOID   = 704;
+const int UNKNOWNOID     = 705;
+const int CIRCLEOID      = 718;
+const int CASHOID        = 790;
+const int INETOID        = 869;
+const int CIDROID        = 650;
+const int BPCHAROID      = 1042;
+const int VARCHAROID     = 1043;
+const int DATEOID        = 1082;
+const int TIMEOID        = 1083;
+const int TIMESTAMPOID   = 1114;
+const int TIMESTAMPTZOID = 1184;
+const int INTERVALOID    = 1186;
+const int TIMETZOID      = 1266;
+const int ZPBITOID       = 1560;
+const int VARBITOID      = 1562;
+const int NUMERICOID     = 1700;
 
 extern(C)
 {
@@ -153,9 +200,8 @@ extern(C)
     };
 
     /* Function types for notice-handling callbacks */
-    //typedef void (*PQnoticeProcessor) (void *arg, char *message);
-    alias void* PQnoticeProcessor;
-    alias void* PQnoticeReceiver;
+    alias void function(void *arg, PGresult *res)PQnoticeReceiver;
+    alias void function(void *arg, char *message)PQnoticeProcessor;
 
     /* Print options for PQprint() */
     alias char pqbool;
@@ -207,12 +253,11 @@ extern(C)
     {
         int         len;
         int         isint;
-        union U
+        union u
         {
             int *ptr;                                       /* can't use void (dec compiler barfs)	 */
             int integer;
         };
-        U u;
     };
 }
 
@@ -310,12 +355,8 @@ extern(C)
     void PQuntrace(PGconn *conn);
 
     /* Override default notice handling routines */
-    PQnoticeReceiver PQsetNoticeReceiver(PGconn *conn,
-        PQnoticeReceiver proc,
-        void *arg);
-    PQnoticeProcessor PQsetNoticeProcessor(PGconn *conn,
-        PQnoticeProcessor proc,
-        void *arg);
+    PQnoticeReceiver PQsetNoticeReceiver(PGconn *conn, PQnoticeReceiver proc, void *arg);
+    PQnoticeProcessor PQsetNoticeProcessor(PGconn *conn, PQnoticeProcessor proc, void *arg);
 
     /*
      *	   Used to set callback that prevents concurrent access to
@@ -324,55 +365,54 @@ extern(C)
      *	   Only required for multithreaded apps that use kerberos
      *	   both within their app and for postgresql connections.
      */
-    /*
-        typedef void (*pgthreadlock_t) (int acquire);
-
-        pgthreadlock_t PQregisterThreadLock(pgthreadlock_t newhandler);
-    */
+    alias void  function(int acquire)pgthreadlock_t;
+    pgthreadlock_t  PQregisterThreadLock(pgthreadlock_t newhandler);
     /* === in fe-exec.c === */
 
     /* Simple synchronous query */
-    PGresult *PQexec(PGconn *conn, char *query);
-    PGresult *PQexecParams(PGconn *conn,
-        char *command,
-        int nParams,
-        Oid *paramTypes,
-        char** paramValues,
-        int *paramLengths,
-        int *paramFormats,
-        int resultFormat);
+    PGresult* PQexec(PGconn *conn, char* query);
+    PGresult* PQexecParams(PGconn *conn,
+                           char *command,
+                           int nParams,
+                           Oid *paramTypes,
+                           char** paramValues,
+                           int *paramLengths,
+                           int *paramFormats,
+                           int resultFormat);
 
     PGresult *PQprepare(PGconn *conn, char *stmtName,
-        char *query, int nParams,
-        Oid *paramTypes);
+                        char *query, int nParams,
+                        Oid *paramTypes);
+
     PGresult *PQexecPrepared(PGconn *conn,
-        char *stmtName,
-        int nParams,
-        char** paramValues,
-        int *paramLengths,
-        int *paramFormats,
-        int resultFormat);
+                            char *stmtName,
+                            int nParams,
+                            char** paramValues,
+                            int *paramLengths,
+                            int *paramFormats,
+                            int resultFormat);
 
     /* Interface for multiple-result or asynchronous queries */
     int  PQsendQuery(PGconn *conn, char *query);
     int PQsendQueryParams(PGconn *conn,
-        char *command,
-        int nParams,
-        const Oid *paramTypes,
-        char** paramValues,
-        int *paramLengths,
-        int *paramFormats,
-        int resultFormat);
+                          char *command,
+                          int nParams,
+                          Oid *paramTypes,
+                          char** paramValues,
+                          int *paramLengths,
+                          int *paramFormats,
+                          int resultFormat);
+
     int PQsendPrepare(PGconn *conn, char *stmtName,
-        char *query, int nParams,
-        const Oid *paramTypes);
+                      char *query, int nParams,
+                      Oid *paramTypes);
     int PQsendQueryPrepared(PGconn *conn,
-        char *stmtName,
-        int nParams,
-        char** paramValues,
-        int *paramLengths,
-        int *paramFormats,
-        int resultFormat);
+                            char *stmtName,
+                            int nParams,
+                            char** paramValues,
+                            int *paramLengths,
+                            int *paramFormats,
+                            int resultFormat);
     PGresult *PQgetResult(PGconn *conn);
 
     /* Routines for managing an asynchronous query */
