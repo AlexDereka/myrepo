@@ -25,7 +25,10 @@
 
 module libpq;
 
-private import std.c.stdio;
+version (Tango)
+    private import tango.stdc.stdio;
+else
+    private import std.c.stdio;
 
 alias char uchar;
 alias uint Oid;
